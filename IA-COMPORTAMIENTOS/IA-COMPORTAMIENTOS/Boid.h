@@ -57,10 +57,11 @@ private:
 	float follow_Magnitud;
 	//Separate
 	std::vector<vector2*>compas_pos;
+	std::vector<Boid*>compas;
 	float m_acelartionTime = 0;
 	int vec2ArrayCount = 0;
 public:
-	bool iLeader = true;
+	bool iLeader = false;
 	int follow_pathNum = 0;
 	vector2 m_wamderPos;
 	sf::Sprite m_sprite;
@@ -86,6 +87,7 @@ public:
 	void SetFollowPath(const vector2& pointA, const vector2& pointB,const float & pathRatio, const float & pointRatio, const float & magnitud);
 	void setBoidRatio(const float &ratio) { m_ratio =ratio; };
 	void setcompasPosition(std::vector<vector2*>compa) { compas_pos = compa; };
+	void setcompas(std::vector<Boid*>GETcompas) { compas = GETcompas; };
 	vector2* getBoidPosition() { return m_position; };
 	vector2 getBoidDirection() { return m_direccion; };
 	float getBoidRatio() { return m_ratio; };
@@ -110,9 +112,9 @@ public:
 	static vector2 followPaht(const vector2& pointA, const vector2& pointB, const vector2& pos,const float & pathRatio, const float & pointRatio, const float & magnitud,bool&arrivepoint,bool &outofpath);
 	static vector2 separate(const vector2& pos, std::vector<vector2*>& compaPos,const float & ratio, const float & magnitud);
 	static vector2 cohesion(const vector2& pos, std::vector<vector2*>& compaPos,const float & ratio, const float & magnitud);
-	static vector2 alineacion(const vector2& pos, std::vector<Boid>& compas,const float & ratio, const float & magnitud);
-	static vector2 floking( Boid& me, std::vector<Boid>& compas, std::vector<vector2*>& compaPos,const float & ratio, const float & magnitud);
-	static vector2 followTheLeader(Boid & me, std::vector<Boid>& compas, std::vector<vector2*>& compaPo, const float & ratio, const float & magnitud);
+	static vector2 alineacion(const vector2& pos, std::vector<Boid*>& compas,const float & ratio, const float & magnitud);
+	static vector2 floking( Boid& me, std::vector<Boid*>& compas, std::vector<vector2*>& compaPos,const float & ratio, const float & magnitud);
+	static vector2 followTheLeader(Boid & me, std::vector<Boid*>& compas, std::vector<vector2*>& compaPo, const float & ratio, const float & magnitud);
 	static bool bf_arrive(const vector2& posI, const vector2 & posF, const float & ratio);
 	void changeSeekPos(std::vector<Point>& vec);
 

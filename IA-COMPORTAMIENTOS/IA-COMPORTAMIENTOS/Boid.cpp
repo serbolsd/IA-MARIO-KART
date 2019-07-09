@@ -190,9 +190,13 @@ void Boid::update()
 	{
 		newdirection += followPaht(follow_pointA,follow_pointB,*m_position,follow_PathRatio,follow_PointRatio,follow_Magnitud,b_follow_arrive,outOfPath);
 	}
-	if (true)
+	if (b_floking)
 	{
-
+		newdirection += floking(*this,compas,compas_pos,100,10);
+	}
+	if (b_followTheLeader)
+	{
+		newdirection += followTheLeader(*this, compas, compas_pos, 100, 10);
 	}
 	newdirection += separate(*m_position,compas_pos,m_ratio,10);
 	vector2 FSteering = newdirection;
@@ -552,7 +556,7 @@ vector2 Boid::cohesion(const vector2 & pos, std::vector<vector2*>& compaPos, con
 	return F;
 }
 
-vector2 Boid::alineacion(const vector2 & pos, std::vector<Boid>& compas, const float & ratio, const float & magnitud)
+vector2 Boid::alineacion(const vector2 & pos, std::vector<Boid*>& compas, const float & ratio, const float & magnitud)
 {
 	vector2 F;
 	vector2 sum;
@@ -560,10 +564,10 @@ vector2 Boid::alineacion(const vector2 & pos, std::vector<Boid>& compas, const f
 	for (int i = 0; i < compas.size(); i++)
 	{
 		vector2 dist = pos;
-		dist -= *compas[i].getBoidPosition();
+		dist -= *compas[i]->getBoidPosition();
 		if (dist.magnitud() <= ratio)
 		{
-			sum += compas[i].getBoidDirection();
+			sum += compas[i]->getBoidDirection();
 			numInRange++;
 		}
 	}
@@ -577,16 +581,16 @@ vector2 Boid::alineacion(const vector2 & pos, std::vector<Boid>& compas, const f
 	return F;
 }
 
-vector2 Boid::floking( Boid & me, std::vector<Boid>& compas, std::vector<vector2*>& compaPos, const float & ratio, const float & magnitud)
+vector2 Boid::floking( Boid & me, std::vector<Boid*>& compas, std::vector<vector2*>& compaPos, const float & ratio, const float & magnitud)
 {
 	vector2 F;
 	F = cohesion(*me.getBoidPosition(), compaPos, ratio, magnitud);
 	F += alineacion(*me.getBoidPosition(), compas, ratio, magnitud);
-	F += separate(*me.getBoidPosition(),compaPos,me.getBoidRatio, magnitud);
+	F += separate(*me.getBoidPosition(),compaPos,me.getBoidRatio(), magnitud);
 	return F;
 }
 
-vector2 Boid::followTheLeader( Boid & me, std::vector<Boid>& compas, std::vector<vector2*>& compaPos, const float & ratio, const float & magnitud)
+vector2 Boid::followTheLeader( Boid & me, std::vector<Boid*>& compas, std::vector<vector2*>& compaPos, const float & ratio, const float & magnitud)
 {
 	vector2 F;
 	vector2 dir;
@@ -594,21 +598,21 @@ vector2 Boid::followTheLeader( Boid & me, std::vector<Boid>& compas, std::vector
 	{
 		for (int i = 0; i < compas.size(); i++)
 		{
-			if (compas[i].iLeader)
+			if (compas[i]->iLeader)
 			{
-				dir = seek(*me.getBoidPosition(), *compas[i].getBoidPosition(), magnitud);
+				dir = seek(*me.getBoidPosition(), *compas[i]->getBoidPosition(), magnitud);
+				vector2 dist = *me.getBoidPosition();
+				dist-= *compas[i]->getBoidPosition();
+				if (dist.magnitud()<=ratio)
+				{
+					dir+=flee(*me.getBoidPosition(), *compas[i]->getBoidPosition(),ratio, magnitud*1.5);
+				}
+				F = dir;
 			}
-			vector2 dist = *me.getBoidPosition();
-			dist-= *compas[i].getBoidPosition();
-			if (dist.magnitud()<=ratio)
-			{
-				dir+=flee(*me.getBoidPosition(), *compas[i].getBoidPosition(),ratio, magnitud*1.5);
-			}
-			F = dir;
 		}
 	}
-	F += cohesion(*me.getBoidPosition(), compaPos, ratio, magnitud);
-	F+=separate(*me.getBoidPosition(), compaPos, me.m_ratio, magnitud);
+	//F += cohesion(*me.getBoidPosition(), compaPos, ratio, magnitud);
+	//F+=separate(*me.getBoidPosition(), compaPos, me.m_ratio, magnitud);
 
 	return F;
 }

@@ -8,6 +8,6 @@ public:
 protected:
 	std::string Event;
 	Observer *NextObserver; 
-	virtual void OnObserver();
+	virtual void OnObserver() {};
 };
 
