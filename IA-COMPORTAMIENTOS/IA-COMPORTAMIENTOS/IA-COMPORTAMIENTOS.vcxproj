@@ -138,12 +138,16 @@
   <ItemGroup>
     <ClCompile Include="Boid.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Observer.cpp" />
+    <ClCompile Include="Observe_Event.cpp" />
     <ClCompile Include="Point.cpp" />
     <ClCompile Include="Runner.cpp" />
     <ClCompile Include="vector2.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Boid.h" />
+    <ClInclude Include="Observer.h" />
+    <ClInclude Include="Observe_Event.h" />
     <ClInclude Include="Point.h" />
     <ClInclude Include="Runner.h" />
     <ClInclude Include="vector2.h" />

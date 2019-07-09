@@ -17,7 +17,7 @@ private:
 	float m_actualMaxSpeed;
 	float m_acceleration;
 	float m_ratio;
-	vector2 m_position;
+	vector2* m_position;
 	vector2 m_direccion;
 	vector2 fliccion;
 	void setPosition(const float& posX, const float& posy);
@@ -55,10 +55,12 @@ private:
 	float follow_PathRatio;
 	float follow_PointRatio;
 	float follow_Magnitud;
-
+	//Separate
+	std::vector<vector2*>compas_pos;
 	float m_acelartionTime = 0;
 	int vec2ArrayCount = 0;
 public:
+	bool iLeader = true;
 	int follow_pathNum = 0;
 	vector2 m_wamderPos;
 	sf::Sprite m_sprite;
@@ -73,6 +75,8 @@ public:
 	bool b_wandeRamTime = false;
 	bool b_wandeToPoint = false;
 	bool b_followPath = false;
+	bool b_floking = false;
+	bool b_followTheLeader = false;
 	void SetSeekPos(const vector2& objetivePos,const float & magnitud);
 	void SetFleeData(const vector2& objetPos, const float & ratio, const float & magnitud);
 	void SetArriveData(const vector2& arrivePos, const float & ratio, const float & magnitud);
@@ -81,12 +85,16 @@ public:
 	void SetobstacleData(const vector2& objetPos, const float & ratio, const float & magnitud);
 	void SetFollowPath(const vector2& pointA, const vector2& pointB,const float & pathRatio, const float & pointRatio, const float & magnitud);
 	void setBoidRatio(const float &ratio) { m_ratio =ratio; };
-	vector2 getBoidPosition() { return m_position; };
+	void setcompasPosition(std::vector<vector2*>compa) { compas_pos = compa; };
+	vector2* getBoidPosition() { return m_position; };
 	vector2 getBoidDirection() { return m_direccion; };
 	float getBoidRatio() { return m_ratio; };
 	float getBoidSpeed() { return m_speed; };
+	void onDelete();
 public:
-	void init(const float& weight = 1.0f, const float& speed = 2, const float& maxSpeed = 2, const float& acceleration = 1.0f, const float& posX = 0.0f, const float& posY = 0.0f);
+	bool stay = false;
+	void init(const float& weight = 1.0f, const float& speed = 2, const float& maxSpeed = 2, const float& acceleration = 1.0f, const float& posX = 0.0f, const float& posY = 0.0f, const float& ratio = 0.0f);
+	void setTexture(std::string dir_texture);
 	void destroy();
 	void update();
 	void render( sf::RenderWindow &window);
@@ -100,7 +108,11 @@ public:
 	static vector2 wanderRamwhitTime(const vector2& posI, vector2& posF, const float & rangeX, const float & rangeY, float & timeTrans,const float & timeToChange, const float & magnitud);
 	static vector2 wanderToPoint(const vector2& posI, const vector2& posF, const float & ratio,const float& angle, const float & magnitud);
 	static vector2 followPaht(const vector2& pointA, const vector2& pointB, const vector2& pos,const float & pathRatio, const float & pointRatio, const float & magnitud,bool&arrivepoint,bool &outofpath);
-	static vector2 followPaht2(const vector2& pointA, const vector2& pointB, const vector2& pos,const float & pathRatio, const float & pointRatio, const float & magnitud,bool&arrivepoint);
+	static vector2 separate(const vector2& pos, std::vector<vector2*>& compaPos,const float & ratio, const float & magnitud);
+	static vector2 cohesion(const vector2& pos, std::vector<vector2*>& compaPos,const float & ratio, const float & magnitud);
+	static vector2 alineacion(const vector2& pos, std::vector<Boid>& compas,const float & ratio, const float & magnitud);
+	static vector2 floking( Boid& me, std::vector<Boid>& compas, std::vector<vector2*>& compaPos,const float & ratio, const float & magnitud);
+	static vector2 followTheLeader(Boid & me, std::vector<Boid>& compas, std::vector<vector2*>& compaPo, const float & ratio, const float & magnitud);
 	static bool bf_arrive(const vector2& posI, const vector2 & posF, const float & ratio);
 	void changeSeekPos(std::vector<Point>& vec);
 
@@ -109,5 +121,6 @@ public:
 	float m_timeTrans=0;
 	float timeDes = 0;
 	float m_wanderTime = 0;
+	bool minimunSpeed = false;
 };
 

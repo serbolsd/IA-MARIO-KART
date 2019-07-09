@@ -5,7 +5,7 @@
 Boid::Boid()
 {
 	m_direccion = vector2(0.0f, 0.0f);
-	m_position = vector2(0.0f, 0.0f);
+	m_position = new vector2(0.0f, 0.0f);
 	m_seekObjetivePos = vector2(0.0f, 0.0f);
 	m_fleeObjetPos = vector2(0.0f, 0.0f);
 	m_arrivePos = vector2(0.0f, 0.0f);
@@ -18,11 +18,12 @@ Boid::Boid()
 
 Boid::~Boid()
 {
+	
 }
 
 void Boid::setPosition(const float & posX, const float & posy)
 {
-	m_position = vector2(posX, posy);
+	*m_position = vector2(posX, posy);
 }
 
 
@@ -80,14 +81,32 @@ void Boid::SetFollowPath(const vector2 & pointA, const vector2 & pointB, const f
 
 }
 
-void Boid::init(const float& weight, const float& speed, const float& maxSpeed, const float& acceleration, const float& posX, const float& posY)
+void Boid::onDelete()
+{
+	delete m_position;
+}
+
+void Boid::init(const float& weight, const float& speed, const float& maxSpeed, const float& acceleration, const float& posX, const float& posY, const float& ratio)
 {
 	m_weight = weight;
 	m_speed = speed;
 	m_maxSpeed = maxSpeed;
 	m_acceleration = acceleration;
 	setPosition(posX, posY);
-	if (!texture.loadFromFile("Resources\\image\\Corredor.png"))
+	if (!texture.loadFromFile("Resources\\image\\sonic.png"))
+	{
+		std::cout << "cant lodad texture";
+		// error...
+	}
+	m_sprite.setTexture(texture);
+	size = texture.getSize();
+	m_sprite.setOrigin(size.x / 2, size.y / 2);
+	m_ratio = ratio;
+}
+
+void Boid::setTexture(std::string dir_texture)
+{
+	if (!texture.loadFromFile(dir_texture))
 	{
 		std::cout << "cant lodad texture";
 		// error...
@@ -109,17 +128,19 @@ void Boid::update()
 	{
 		if (outOfPath)
 		{
-			
+			m_speed = m_speed;
 		}
 		else
 		{
 			m_speed=m_acceleration*m_acelartionTime;
 			m_actualSpeed = m_speed;
+			minimunSpeed = true;
 		}
 	}
 	else if(m_speed >= m_maxSpeed)
 	{
-		m_timeTrans = 0;
+		m_speed = m_maxSpeed;
+		m_timeTrans = m_speed / m_acceleration;
 	}
 	if (!outOfPath)
 	{
@@ -129,46 +150,51 @@ void Boid::update()
 	vector2 newdirection(0, 0);
 	if (b_Seek)
 	{
-		vector2 prueva = seek(m_position, m_seekObjetivePos, m_seekMangitude);
+		vector2 prueva = seek(*m_position, m_seekObjetivePos, m_seekMangitude);
 		newdirection += prueva;
 	}
 	if (b_flee)
 	{
-		vector2 prueva = flee(m_position, m_fleeObjetPos, m_fleeRatio, m_fleeMangitude);
+		vector2 prueva = flee(*m_position, m_fleeObjetPos, m_fleeRatio, m_fleeMangitude);
 		newdirection += prueva;
 	}
 	if (b_arrive)
 	{
-		newdirection += arrive(m_position, m_arrivePos, m_arriveMangitude, m_arriveRatio);
+		newdirection += arrive(*m_position, m_arrivePos, m_arriveMangitude, m_arriveRatio);
 	}
 	if (b_pursue)
 	{
-		newdirection += pursue(m_position, m_objetivePos, m_objetiveDir, 2,m_objetiveSpeed, m_pursueMangitude);
+		newdirection += pursue(*m_position, m_objetivePos, m_objetiveDir, 2,m_objetiveSpeed, m_pursueMangitude);
 	}
 	if (b_evade)
 	{
-		newdirection += evade(m_position, m_predatorPos, m_predatorDir, 2,m_predatorSpeed , m_evadeMangitude);
+		newdirection += evade(*m_position, m_predatorPos, m_predatorDir, 2,m_predatorSpeed , m_evadeMangitude);
 	}
 	if (b_obstacle)
 	{
-		newdirection += obstacle(m_position, m_obstaclePos, m_obstacleRatio,m_obstacleMagnitud);
+		newdirection += obstacle(*m_position, m_obstaclePos, m_obstacleRatio,m_obstacleMagnitud);
 	}
 	if (b_wandeRam)
 	{
-		newdirection += wanderRam(m_position,500,500,10);
+		newdirection += wanderRam(*m_position,500,500,10);
 	}
 	if (b_wandeRamTime)
 	{
-		newdirection += wanderRamwhitTime(m_position, m_wamderPos, 1000, 1000, m_wanderTime, 3, 10);
+		newdirection += wanderRamwhitTime(*m_position, m_wamderPos, 1000, 1000, m_wanderTime, 3, 10);
 	}
 	if (b_wandeToPoint)
 	{
-		newdirection += wanderToPoint(m_position,m_wamderPos,30,45,10);
+		newdirection += wanderToPoint(*m_position,m_wamderPos,30,45,10);
 	}
 	if (b_followPath)
 	{
-		newdirection += followPaht(follow_pointA,follow_pointB,m_position,follow_PathRatio,follow_PointRatio,follow_Magnitud,b_follow_arrive,outOfPath);
+		newdirection += followPaht(follow_pointA,follow_pointB,*m_position,follow_PathRatio,follow_PointRatio,follow_Magnitud,b_follow_arrive,outOfPath);
 	}
+	if (true)
+	{
+
+	}
+	newdirection += separate(*m_position,compas_pos,m_ratio,10);
 	vector2 FSteering = newdirection;
 	vector2 fliccion;
 	
@@ -179,12 +205,13 @@ void Boid::update()
 		FSteering *= m_actualSpeed;
 	}
 	FSteering *= m_weight;// se truquea con la valocidad maxima
-	FSteering += m_direccion;
+	newdirection = FSteering;
+	newdirection += m_direccion;
 	if (outOfPath)
 	{
 		float scalarFlic = 1 - m_weight;
-		fliccion = FSteering.normalize();
-		fliccion *=m_actualSpeed;
+		fliccion = FSteering;
+		//fliccion *=m_actualSpeed;
 		fliccion *= -1;
 		fliccion *= scalarFlic;
 		vector2 result = FSteering;
@@ -192,21 +219,26 @@ void Boid::update()
 		//result *= m_actualSpeed;
 		if (m_speed> result.magnitud())
 		{
-			float desaceleraction = (result.magnitud() - m_actualSpeed)/m_weight;
+			float desaceleraction = (result.magnitud() - m_actualSpeed)/(m_weight*1.2);
 			float des = desaceleraction * timeDes;
 			m_speed = m_actualSpeed + des;
+			if (m_speed<= 0)
+			{
+				m_speed = result.magnitud();
+			}
 			//m_speed = 1;
 			//fliccion = fliccion.normalize();
 			//fliccion *= (m_maxSpeed- m_speed);
 			//fliccion *= scalarFlic;
-			std::cout <<"time:"<< timeDes<<"\n";
-			std::cout <<"des:"<< des <<"\n";
-			std::cout <<"speed:"<< m_speed<<"\n";
-			std::cout <<"magnitud:"<< result.magnitud() <<"\n";
+			//std::cout <<"time:"<< timeDes<<"\n";
+			//std::cout <<"des:"<< des <<"\n";
+			//std::cout <<"speed:"<< m_speed<<"\n";
+			//std::cout <<"magnitud:"<< result.magnitud() <<"\n";
 		}
 		else
 		{
-			//m_speed = result.magnitud();
+			minimunSpeed = true;
+			m_speed = result.magnitud();
 		}
 		//FSteering += fliccion;
 		m_timeTrans = m_speed / m_acceleration;
@@ -214,19 +246,13 @@ void Boid::update()
 //se saca el vectgor de la fuerza menos la direccion y se multiplica por la masa
 	// direccion mas nueva direccion
 	//esto hara que se voltear hasta que encuentra una nueva direccion en la que si se pueda mover
-	vector2 nPos = m_position;
+	vector2 nPos = *m_position;
 	nPos += FSteering;
-	m_direccion *=FSteering.magnitud();
-	nPos += m_direccion.normalize();
+	m_direccion *=1-m_weight;
+	nPos += m_direccion;
 	m_direccion = nPos;
-	m_direccion -= m_position;
+	m_direccion -= *m_position;
 	//FSteering *= m_speed;
-
-	//newdirection = FSteering-vector2(m_speed,m_speed);
-
-	//m_direccion = m_position- FSteering;
-	//m_direccion = newdirection.normalize();
-	//m_direccion *= m_speed*m_weight;
 	m_direccion *=FSteering.magnitud();
 	m_direccion = m_direccion.normalize();
 
@@ -234,11 +260,16 @@ void Boid::update()
 
 void Boid::render(sf::RenderWindow & window)
 {
+	sf::VertexArray lines(sf::LinesStrip, 2);
 	m_direccion *= m_speed;
-	m_position += m_direccion;
-	m_sprite.setPosition(m_position.x,m_position.y);
+	*m_position += m_direccion;
+	vector2 position = *m_position;
+	m_sprite.setPosition(position.x, position.y);
+	lines[0].position = sf::Vector2f(position.x, position.y);
+	lines[1].position = sf::Vector2f(position.x+m_direccion.x*10, position.y+m_direccion.y*10);
 	window.draw(m_sprite);
-	if (bf_arrive(m_position,m_seekObjetivePos,10))
+	//window.draw(lines);
+	if (bf_arrive(position,m_seekObjetivePos,10))
 	{
 		b_inPoint = true;
 	}
@@ -448,7 +479,7 @@ vector2 Boid::followPaht(const vector2 & pointA, const vector2 & pointB, const v
 	if (distToPath > pathRatio)
 	{
 		outofpath = true;
-		Dir2 = seek(pos, Q, magnitud*1000);
+		Dir2 = seek(pos, Q, magnitud*1.5);
 		F += Dir2;
 	}
 	else
@@ -467,22 +498,121 @@ vector2 Boid::followPaht(const vector2 & pointA, const vector2 & pointB, const v
 	return F;
 }
 
-vector2 Boid::followPaht2(const vector2 & pointA, const vector2 & pointB, const vector2 & pos, const float & pathRatio, const float & pointRatio, const float & magnitud, bool & arrivepoint)
+vector2 Boid::separate(const vector2 & pos, std::vector<vector2*>& compasPos, const float & ratio, const float & magnitud)
 {
-	//dir = pointB;
-	//dir -= pos;
-	//dist = dir.magnitud();
-	//if (dist <= pointRatio)
-	//{
-	//	arrivepoint = true;
-	//}
-	//else
-	//{
-	//	arrivepoint = false;
-	//}
-	//return F;
-	return vector2();
+	vector2 F;
+	for (int i = 0; i < compasPos.size(); i++)
+	{
+		vector2 dist= pos;
+		dist -= *compasPos[i];
+		vector2 compaPosition = *compasPos[i];
+		vector2 miPosition = pos;
+		if (dist.magnitud()<ratio&& miPosition!=compaPosition)
+		{
+			//std::cout << "separate\n";
+			vector2 dir = dist;
+			dir = dir.normalize();
+			dir *= magnitud;
+			dir *=ratio/dist.magnitud();
+			F += dir;
+		}
+		else
+		{
+			//std::cout << "no separate\n";
+		}
+	}
+	return F;
 }
+
+vector2 Boid::cohesion(const vector2 & pos, std::vector<vector2*>& compaPos, const float & ratio, const float & magnitud)
+{
+	vector2 F;
+	vector2 sum;
+	int numInRange=0;
+	for (int i = 0; i < compaPos.size(); i++)
+	{
+		vector2 dist = pos;
+		dist -= *compaPos[i];
+		if (dist.magnitud()<= ratio)
+		{
+			sum += *compaPos[i];
+			numInRange++;
+		}
+	}
+	if (numInRange>0)
+	{
+		sum /= numInRange;
+		vector2 dir = sum;
+		dir -= pos;
+		vector2 dist = dir;
+		dir *= magnitud;
+		dir /= ratio / dist.magnitud();
+		F = dir ;
+	}
+	return F;
+}
+
+vector2 Boid::alineacion(const vector2 & pos, std::vector<Boid>& compas, const float & ratio, const float & magnitud)
+{
+	vector2 F;
+	vector2 sum;
+	int numInRange = 0;
+	for (int i = 0; i < compas.size(); i++)
+	{
+		vector2 dist = pos;
+		dist -= *compas[i].getBoidPosition();
+		if (dist.magnitud() <= ratio)
+		{
+			sum += compas[i].getBoidDirection();
+			numInRange++;
+		}
+	}
+	if (numInRange > 0)
+	{
+		sum /= numInRange;
+		vector2 dir = sum;
+		dir *= magnitud;
+		F = dir;
+	}
+	return F;
+}
+
+vector2 Boid::floking( Boid & me, std::vector<Boid>& compas, std::vector<vector2*>& compaPos, const float & ratio, const float & magnitud)
+{
+	vector2 F;
+	F = cohesion(*me.getBoidPosition(), compaPos, ratio, magnitud);
+	F += alineacion(*me.getBoidPosition(), compas, ratio, magnitud);
+	F += separate(*me.getBoidPosition(),compaPos,me.getBoidRatio, magnitud);
+	return F;
+}
+
+vector2 Boid::followTheLeader( Boid & me, std::vector<Boid>& compas, std::vector<vector2*>& compaPos, const float & ratio, const float & magnitud)
+{
+	vector2 F;
+	vector2 dir;
+	if (!me.iLeader)
+	{
+		for (int i = 0; i < compas.size(); i++)
+		{
+			if (compas[i].iLeader)
+			{
+				dir = seek(*me.getBoidPosition(), *compas[i].getBoidPosition(), magnitud);
+			}
+			vector2 dist = *me.getBoidPosition();
+			dist-= *compas[i].getBoidPosition();
+			if (dist.magnitud()<=ratio)
+			{
+				dir+=flee(*me.getBoidPosition(), *compas[i].getBoidPosition(),ratio, magnitud*1.5);
+			}
+			F = dir;
+		}
+	}
+	F += cohesion(*me.getBoidPosition(), compaPos, ratio, magnitud);
+	F+=separate(*me.getBoidPosition(), compaPos, me.m_ratio, magnitud);
+
+	return F;
+}
+
 
 bool Boid::bf_arrive(const vector2 & posI, const vector2 & posF, const float & ratio)
 {
