@@ -138,6 +138,7 @@
   <ItemGroup>
     <ClCompile Include="Boid.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Manager.cpp" />
     <ClCompile Include="Observer.cpp" />
     <ClCompile Include="Observe_Event.cpp" />
     <ClCompile Include="Point.cpp" />
@@ -146,6 +147,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Boid.h" />
+    <ClInclude Include="Manager.h" />
     <ClInclude Include="Observer.h" />
     <ClInclude Include="Observe_Event.h" />
     <ClInclude Include="Point.h" />

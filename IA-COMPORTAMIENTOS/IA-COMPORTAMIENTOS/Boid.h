@@ -4,6 +4,7 @@
 #include <Graphics.hpp>
 #include "Point.h"
 #include <Window.hpp>
+#include "Observe_Event.h"
 class Boid
 {
 public:
@@ -59,8 +60,12 @@ private:
 	std::vector<vector2*>compas_pos;
 	std::vector<Boid*>compas;
 	float m_acelartionTime = 0;
+
 	int vec2ArrayCount = 0;
+	std::string m_name;
+
 public:
+	Observe_Event *OE_followPath;
 	bool iLeader = false;
 	int follow_pathNum = 0;
 	vector2 m_wamderPos;
@@ -88,6 +93,9 @@ public:
 	void setBoidRatio(const float &ratio) { m_ratio =ratio; };
 	void setcompasPosition(std::vector<vector2*>compa) { compas_pos = compa; };
 	void setcompas(std::vector<Boid*>GETcompas) { compas = GETcompas; };
+	void setName(std::string name) { m_name = name; };
+	std::string getName() { return m_name; };
+
 	vector2* getBoidPosition() { return m_position; };
 	vector2 getBoidDirection() { return m_direccion; };
 	float getBoidRatio() { return m_ratio; };
@@ -118,11 +126,19 @@ public:
 	static bool bf_arrive(const vector2& posI, const vector2 & posF, const float & ratio);
 	void changeSeekPos(std::vector<Point>& vec);
 
+	float getDistToPoint();
+
 	bool b_follow_arrive = false;
 	bool outOfPath = false;
 	float m_timeTrans=0;
 	float timeDes = 0;
 	float m_wanderTime = 0;
 	bool minimunSpeed = false;
+
+
+	int numVuelta=0;
+	float dist=0;
+	int punto=0;
+	int lugar = 0;
 };
 

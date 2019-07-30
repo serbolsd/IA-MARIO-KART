@@ -13,12 +13,13 @@ Boid::Boid()
 	m_objetiveDir = vector2(0.0f, 0.0f);
 	m_predatorPos = vector2(0.0f, 0.0f);
 	m_predatorDir = vector2(0.0f, 0.0f);
+	
 }
 
 
 Boid::~Boid()
 {
-	
+	//delete OE_followPath;
 }
 
 void Boid::setPosition(const float & posX, const float & posy)
@@ -83,7 +84,7 @@ void Boid::SetFollowPath(const vector2 & pointA, const vector2 & pointB, const f
 
 void Boid::onDelete()
 {
-	delete m_position;
+	//delete m_position;
 }
 
 void Boid::init(const float& weight, const float& speed, const float& maxSpeed, const float& acceleration, const float& posX, const float& posY, const float& ratio)
@@ -102,6 +103,7 @@ void Boid::init(const float& weight, const float& speed, const float& maxSpeed, 
 	size = texture.getSize();
 	m_sprite.setOrigin(size.x / 2, size.y / 2);
 	m_ratio = ratio;
+
 }
 
 void Boid::setTexture(std::string dir_texture)
@@ -259,6 +261,10 @@ void Boid::update()
 	//FSteering *= m_speed;
 	m_direccion *=FSteering.magnitud();
 	m_direccion = m_direccion.normalize();
+	if (b_follow_arrive)
+	{
+		OE_followPath = OE_followPath->nextEvent();
+	}
 
 }
 
@@ -291,8 +297,6 @@ vector2 Boid::seek(const vector2& posI, const vector2 & posF, const float& magni
 	dir = posF;
 	dir -= posI;
 	m = dir.magnitud();
-	//dir = dir.normalize();
-	//dir /= m;
 	F = dir * magnitud;
 	return F;
 }
@@ -494,6 +498,7 @@ vector2 Boid::followPaht(const vector2 & pointA, const vector2 & pointB, const v
 	if (dist<=pointRatio)
 	{
 		arrivepoint = true;
+		
 	}
 	else
 	{
@@ -640,4 +645,11 @@ void Boid::changeSeekPos(std::vector<Point>& vec)
 		vec2ArrayCount = 0;
 	}
 	m_seekObjetivePos = vec[vec2ArrayCount].getPos();
+}
+
+float Boid::getDistToPoint()
+{
+	vector2 dist = follow_pointB;
+	dist -= *m_position;
+	return dist.magnitud();
 }

@@ -13,5 +13,11 @@ Observe_Event::~Observe_Event()
 
 void Observe_Event::OnObserver()
 {
-	Event = "COMPLETE EVENT";
+	std::cout << m_Event;
+}
+
+void Observe_Event::onDelete()
+{
+	
+
 }

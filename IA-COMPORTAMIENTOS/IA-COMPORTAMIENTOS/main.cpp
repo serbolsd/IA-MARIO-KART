@@ -5,25 +5,45 @@
 #include "Boid.h"
 #include <chrono>
 #include "Point.h"
+#include "Manager.h"
+#include <sstream>
+sf::Font font; 
+sf::Text *text;
 sf::RenderWindow *g_window;
-//sf::RenderWindow *g_window2;
 std::vector<Boid*> Boids;
 std::vector<vector2*> boidsPos;
 std::vector<Point> objetives;
 sf::Texture map_texture;
 sf::Vector2u map_size;
 sf::Sprite map_sprite;
-sf::Sprite gsprite;
-sf::Texture sonic_texture;
-std::vector<sf::Sprite> sprites;
-sf::Vector2u sonic_size;
 vector2 mousePos;
 void display();
 void InitBoids();
 void update();
 void render();
+Manager g_manager;
+void chekPositions();
+void onDelete()
+{
+	delete g_window;
+	for (size_t i = 0; i < Boids.size(); i++)
+	{
+		Boids[i]->onDelete();
+		delete Boids[i];
+		delete boidsPos[i];
+		
+	}
+	delete[]text;
+}
 int main()
 {
+
+	
+	if (!font.loadFromFile("SonicShuffle.ttf"))
+	{
+		std::cout << "cant lodad font";
+		// error...
+	}
 	if (!map_texture.loadFromFile("Resources\\image\\mariocircuit-3.png"))
 	{
 		std::cout << "cant lodad texture";
@@ -40,10 +60,10 @@ int main()
 	//g_window->setFramerateLimit(120);
 	// run the program as long as the window is open
 	InitBoids();
+	sf::Event event;
 	while (g_window->isOpen())
 	{
 		// check all the window's events that were triggered since the last iteration of the loop
-		sf::Event event;
 		while (g_window->pollEvent(event))
 		{
 			// "close requested" event: we close the window
@@ -77,7 +97,8 @@ int main()
 	{
 		delete Boids[i];
 	}
-	Boids.clear();
+	onDelete();
+	//Boids.clear();
 	return 0;
 }
 
@@ -199,17 +220,7 @@ void InitBoids()
 	boid4.SetSeekPos(objetives[1].getPos(), 10);
 	boid4.SetFollowPath(objetives[21].getPos(), objetives[0].getPos(), 50, 50, 10);
 	boid4.m_sprite.setColor(sf::Color(255, 255, 255, 255));
-	//Boids.push_back(boid4);
-	if (!sonic_texture.loadFromFile("Resources\\image\\sonic.png"))
-	{
-		std::cout << "cant lodad texture";
-		// error...
-	}
-	gsprite.setTexture(sonic_texture);
-	gsprite.setPosition(boid4.getBoidPosition()->x, boid4.getBoidPosition()->y);
-	sonic_size = map_texture.getSize();
-	gsprite.setOrigin(sonic_size.x / 2, sonic_size.y / 2);
-	sprites.push_back(gsprite);
+
 	//Boids[0].m_sprite = gsprite;
 
 	Boid boid5;
@@ -227,6 +238,7 @@ void InitBoids()
 	Boids.resize(8);
 	//Boids.resize(12);
 	Boids[0] = new Boid;
+	Boids[0]->setName("Sonic");
 	Boids[0]->init(0.5, 0, 26, 2, 63, 484, 30);
 	Boids[0]->b_followPath = true;
 	Boids[0]->iLeader = true;
@@ -236,6 +248,7 @@ void InitBoids()
 	Boids[1] = new Boid;
 	Boids[1]->init(.25, 0, 20, 2, 97, 460, 30);
 	Boids[1]->setTexture("Resources\\image\\metalSonic.png");;
+	Boids[1]->setName("MetalSonic");
 	Boids[1]->b_followPath = true;
 	Boids[1]->SetSeekPos(objetives[1].getPos(), 10);
 	Boids[1]->SetFollowPath(objetives[objetives.size() - 1].getPos(), objetives[0].getPos(), 80, 80, 10);
@@ -244,6 +257,7 @@ void InitBoids()
 	Boids[2]->init(0.5, 0, 24, 2, 97, 507, 30);
 	Boids[2]->b_followPath = true;
 	Boids[2]->setTexture("Resources\\image\\silver.png");;
+	Boids[2]->setName("Silver");
 	Boids[2]->SetSeekPos(objetives[1].getPos(), 10);
 	Boids[2]->SetFollowPath(objetives[objetives.size() - 1].getPos(), objetives[0].getPos(), 80, 80, 10);
 
@@ -251,6 +265,7 @@ void InitBoids()
 	Boids[3]->init(0.3, 0, 25, 2, 63, 533, 30);
 	Boids[3]->b_followPath = true;
 	Boids[3]->setTexture("Resources\\image\\nukles.png");;
+	Boids[3]->setName("Nudillos");
 	Boids[3]->SetSeekPos(objetives[1].getPos(), 10);
 	Boids[3]->SetFollowPath(objetives[objetives.size() - 1].getPos(), objetives[0].getPos(), 80, 80, 10);
 
@@ -258,6 +273,7 @@ void InitBoids()
 	Boids[4]->init(0.6, 0, 21, 4, 97, 557, 30);
 	Boids[4]->b_followPath = true;
 	Boids[4]->setTexture("Resources\\image\\amy.png");;
+	Boids[4]->setName("Amy");
 	Boids[4]->SetSeekPos(objetives[1].getPos(), 10);
 	Boids[4]->SetFollowPath(objetives[objetives.size() - 1].getPos(), objetives[0].getPos(), 80, 80, 10);
 
@@ -265,6 +281,7 @@ void InitBoids()
 	Boids[5]->init(0.7, 0, 20, 5, 63, 581, 30);
 	Boids[5]->b_followPath = true;
 	Boids[5]->setTexture("Resources\\image\\tails.png");;
+	Boids[5]->setName("Tails");
 	Boids[5]->SetSeekPos(objetives[1].getPos(), 10);
 	Boids[5]->SetFollowPath(objetives[objetives.size() - 1].getPos(), objetives[0].getPos(), 80, 80, 10);
 
@@ -272,6 +289,7 @@ void InitBoids()
 	Boids[6]->init(0.5, 0, 25, 2, 97, 606, 30);
 	Boids[6]->b_followPath = true;
 	Boids[6]->setTexture("Resources\\image\\shadow.png");;
+	Boids[6]->setName("Shadow");
 	Boids[6]->SetSeekPos(objetives[1].getPos(), 10);
 	Boids[6]->SetFollowPath(objetives[objetives.size() - 1].getPos(), objetives[0].getPos(), 80, 80, 10);
 
@@ -279,44 +297,33 @@ void InitBoids()
 	Boids[7]->init(0.25, 0, 20, 4, 63, 627, 30);
 	Boids[7]->b_followPath = true;
 	Boids[7]->setTexture("Resources\\image\\eggman.png");;
+	Boids[7]->setName("Eggman");
 	Boids[7]->SetSeekPos(objetives[1].getPos(), 10);
 	Boids[7]->SetFollowPath(objetives[objetives.size() - 1].getPos(), objetives[0].getPos(), 80, 80, 10);
 
-	//Boids[8] = new Boid;
-	//Boids[8]->init(0.5, 0, 26, 2, 500, 500, 30);
-	////Boids[8]->b_followTheLeader = true;
-	//Boids[8]->b_floking = true;
-	//Boids[8]->m_sprite.setColor(sf::Color(255, 0, 0, 255));
-	//
-	//Boids[9] = new Boid;
-	//Boids[9]->init(0.5, 0, 26, 2, 400, 520, 30);
-	////Boids[9]->b_followTheLeader = true;
-	//Boids[9]->b_floking = true;
-	//Boids[9]->m_sprite.setColor(sf::Color(255, 0, 0, 255));
-	//
-	//Boids[10] = new Boid;
-	//Boids[10]->init(0.5, 0, 26, 2, 400, 500, 30);
-	////Boids[10]->b_followTheLeader = true;
-	//Boids[10]->b_floking = true;
-	//Boids[10]->m_sprite.setColor(sf::Color(255, 0, 0, 255));
-	//
-	//Boids[11] = new Boid;
-	//Boids[11]->init(0.5, 0, 26, 2, 400, 600, 30);
-	////Boids[11]->b_followTheLeader = true;
-	//Boids[11]->b_floking = true;
-	//Boids[11]->m_sprite.setColor(sf::Color(255, 0, 0, 255));
+
 
 	boidsPos.resize(Boids.size());
+	text = new sf::Text[Boids.size()];
+
+
+	g_manager.initObserveEventsFollowPath(objetives.size());
 	for (int i = 0; i < Boids.size(); i++)
 	{
 		boidsPos[i]=Boids[i]->getBoidPosition();
+		text[i].setFont(font);
+		// set the character size
+		text[i].setCharacterSize(24); // in pixels, not points!
+		text[i].setFillColor(sf::Color::Blue);
+		//text[i].setStyle(sf::Text::Bold | sf::Text::Underlined);
+
 	}
 	for (int i = 0; i < Boids.size(); i++)
 	{
 		Boids[i]->setcompas(Boids);
 		Boids[i]->setcompasPosition(boidsPos);
+		Boids[i]->OE_followPath=g_manager.FirstEvent;
 	}
-
 }
 
 void update()
@@ -331,10 +338,14 @@ void update()
 			{
 				Boids[i]->SetFollowPath(objetives[Boids[i]->follow_pathNum-1].getPos(), objetives[0].getPos(), 30, 30,10);
 				Boids[i]->follow_pathNum = 0;
+				Boids[i]->punto=0;
+				Boids[i]->numVuelta++;
 			}
 			else
 			{
 				Boids[i]->SetFollowPath(objetives[Boids[i]->follow_pathNum-1].getPos(), objetives[Boids[i]->follow_pathNum].getPos(), 30, 30, 10);
+				Boids[i]->punto++;
+
 			}
 		}
 	}
@@ -348,6 +359,8 @@ void update()
 			//Boids[i]->changeSeekPos(objetives);
 		}
 	}
+	chekPositions();
+	
 }
 void render()
 {
@@ -393,19 +406,28 @@ void render()
 		//objetives[i].draw(*g_window);
 	}
 	//g_window->draw(lines);
+	int pos = 0;
 	for (int i = 0; i < Boids.size(); i++)
 	{
-		if (Boids[i]->iLeader)
-		{
-			std::cout << "boid " << i + 1 << " speed: " << Boids[i]->getBoidSpeed() << " lider\n";
-
-		}
-		else
-		{
-
-			std::cout << "boid " << i + 1 << " speed: " << Boids[i]->getBoidSpeed() << " NO lider\n" ;
-		}
+		//std::cout << Boids[i]->lugar << " " << Boids[i]->getName() << "\t speed: " << (int)Boids[i]->getBoidSpeed() << " \t";
+		std::cout << Boids[i]->lugar << " " << Boids[i]->getName() << "\t vuelta: " << (int)Boids[i]->numVuelta << " \tpunto:" << (int)Boids[i]->punto << "\tdist: " << (float)Boids[i]->getDistToPoint();
+		std::stringstream ss;
+		ss << Boids[i]->lugar;
+		ss << " ";
+		ss << " ";
+		ss << Boids[i]->getName();
+		std::string str = ss.str();
+		Boids[i]->OE_followPath->OnObserver();
+		std::cout << "\n";
+		// set the string to display
+		text[i].setString(str);
+		text[i].setPosition(10,10+pos);
+		pos += 20;
+	}
+	for (int i = 0; i < Boids.size(); i++)
+	{
 		Boids[i]->render(*g_window);
+		g_window->draw(text[i]);
 	}
 	
 }
@@ -423,5 +445,67 @@ void display()
 		Boids[i]->m_timeTrans += (timeTrans/60);
 		Boids[i]->m_wanderTime += (timeTrans/1);
 		Boids[i]->timeDes += (timeTrans / 60);
+	}
+}
+
+void chekPositions()
+{
+	for (int i = Boids.size() - 1; i > -1; i--)
+	{
+		for (int j = Boids.size() - 1; j > -1; j--)
+		{
+			if (j == i)
+			{
+				continue;
+			}
+			if (Boids[j]->numVuelta > Boids[i]->numVuelta)
+			{
+				Boid * change = Boids[i];
+				Boids[i] = Boids[j];
+				Boids[j] = change;
+			}
+
+		}
+	}
+	for (int i = Boids.size() - 1; i > -1; i--)
+	{
+		for (int j = Boids.size() - 1; j > -1; j--)
+		{
+			if (j == i)
+			{
+				continue;
+			}
+			if (Boids[j]->punto > Boids[i]->punto
+				&&Boids[j]->numVuelta == Boids[i]->numVuelta)
+			{
+				Boid * change = Boids[i];
+				Boids[i] = Boids[j];
+				Boids[j] = change;
+			}
+		}
+	}
+	for (int i = Boids.size()-1; i > -1; i--)
+	{
+		for (int j = Boids.size()-1; j > -1; j--)
+		{
+
+			if (j == i)
+			{
+				continue;
+			}
+			if (Boids[j]->getDistToPoint() < Boids[i]->getDistToPoint()
+				&& Boids[j]->numVuelta == Boids[i]->numVuelta
+				&& Boids[j]->punto == Boids[i]->punto)
+			{
+				Boid * change = Boids[i];
+				Boids[i] = Boids[j];
+				Boids[j] = change;
+			}
+		}
+	}
+		
+	for (size_t i = 0; i < Boids.size(); i++)
+	{
+		Boids[i]->lugar = i + 1;
 	}
 }
