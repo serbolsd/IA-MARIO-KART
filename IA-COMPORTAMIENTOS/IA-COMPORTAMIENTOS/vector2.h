@@ -31,6 +31,7 @@ public:
 	float magnitud();
 	float squareMagnitud();
 	vector2 cross(vector2 vec);
+
 	/************************************************************************/
 	/* Sobrecarga de operadores                                             */
 	/************************************************************************/
@@ -53,8 +54,13 @@ public:
 	bool operator!=			(const vector2& vec);								/*!< Comparacion negativa entre el valor por eje */
 
 	float& operator[] (const unsigned int& index);										/*!< Retorna el flotante en el lugar correspondiente */
-
+	static void sum(vector2 a, vector2 b, vector2 &result)
+	{
+		result = a + b;
+	};
+	static void mag(vector2 a, float &result)
+	{
+		result = a.magnitud();
+	};
 	
 };
-
-

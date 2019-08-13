@@ -1,7 +1,5 @@
 #include "Boid.h"
 
-
-
 Boid::Boid()
 {
 	m_direccion = vector2(0.0f, 0.0f);
@@ -13,9 +11,7 @@ Boid::Boid()
 	m_objetiveDir = vector2(0.0f, 0.0f);
 	m_predatorPos = vector2(0.0f, 0.0f);
 	m_predatorDir = vector2(0.0f, 0.0f);
-	
 }
-
 
 Boid::~Boid()
 {
@@ -26,7 +22,6 @@ void Boid::setPosition(const float & posX, const float & posy)
 {
 	*m_position = vector2(posX, posy);
 }
-
 
 void Boid::SetSeekPos(const vector2 & objetivePos, const float & magnitud)
 {
@@ -72,10 +67,12 @@ void Boid::SetobstacleData(const vector2 & objetPos, const float & ratio, const 
 	m_obstacleMagnitud = magnitud;
 }
 
-void Boid::SetFollowPath(const vector2 & pointA, const vector2 & pointB, const float & pathRatio, const float & pointRatio, const float & magnitud)
+void Boid::SetFollowPath(Point & pointA, Point & pointB, const float & pathRatio, const float & pointRatio, const float & magnitud)
 {
-	follow_pointA = pointA;
-	follow_pointB = pointB;
+	pointA.color = { 0,0,0,0 };
+	pointB.color = m_color;
+	follow_pointA = pointA.m_pos;
+	follow_pointB = pointB.m_pos;
 	follow_PathRatio = pathRatio;
 	follow_PointRatio = pointRatio;
 	follow_Magnitud = magnitud;
@@ -93,6 +90,7 @@ void Boid::init(const float& weight, const float& speed, const float& maxSpeed, 
 	m_speed = speed;
 	m_maxSpeed = maxSpeed;
 	m_acceleration = acceleration;
+	m_desacceleration = -acceleration;
 	setPosition(posX, posY);
 	if (!texture.loadFromFile("Resources\\image\\sonic.png"))
 	{
@@ -621,7 +619,6 @@ vector2 Boid::followTheLeader( Boid & me, std::vector<Boid*>& compas, std::vecto
 
 	return F;
 }
-
 
 bool Boid::bf_arrive(const vector2 & posI, const vector2 & posF, const float & ratio)
 {

@@ -1,13 +1,15 @@
 #include "vector2.h"
 #include <Window.hpp>
 #include <Graphics.hpp>
-#include "Runner.h"
 #include "Boid.h"
 #include <chrono>
 #include "Point.h"
 #include "Manager.h"
 #include <sstream>
-sf::Font font; 
+#include "GpuPreference.hpp"
+#include "Pruebas.h"
+#include "CinputManager.h"
+sf::Font font;
 sf::Text *text;
 sf::RenderWindow *g_window;
 std::vector<Boid*> Boids;
@@ -21,7 +23,10 @@ void display();
 void InitBoids();
 void update();
 void render();
+void initPruebas();
 Manager g_manager;
+CinputManager g_inManager;
+using namespace pruebas;
 void chekPositions();
 void onDelete()
 {
@@ -29,16 +34,14 @@ void onDelete()
 	for (size_t i = 0; i < Boids.size(); i++)
 	{
 		Boids[i]->onDelete();
-		delete Boids[i];
-		delete boidsPos[i];
-		
+		//delete Boids[i];
+		delete boidsPos[i];	
 	}
 	delete[]text;
 }
 int main()
 {
 
-	
 	if (!font.loadFromFile("SonicShuffle.ttf"))
 	{
 		std::cout << "cant lodad font";
@@ -101,7 +104,6 @@ int main()
 	//Boids.clear();
 	return 0;
 }
-
 void InitBoids()
 {
 	Point p1;
@@ -195,111 +197,87 @@ void InitBoids()
 	Point p21;
 	p21.init(vector2(77, 767));
 	objetives.push_back(p21);
-
-	Boid boid2;
-	boid2.init(.3, 0, 15, 2, 500, 500, 5);
-	boid2.b_followPath = true;
-	boid2.SetSeekPos(objetives[1].getPos(), 10);
-	boid2.SetFollowPath(objetives[2].getPos(), objetives[0].getPos(), 30, 30, 10);
-	boid2.m_sprite.setColor(sf::Color(255, 1, 1, 255));
-
-	Boid boid3;
-	boid3.init(.2, 0, 20, 4, 97, 460, 5);
-	//boid3.setTexture("Resources\\image\\metalSonic.png");
-	boid3.b_followPath = true;
-	boid3.SetSeekPos(objetives[1].getPos(), 10);
-	boid3.SetFollowPath(objetives[21].getPos(), objetives[0].getPos(), 50, 50, 10);
-	//boid3.m_sprite.setColor(sf::Color(0, 255, 1, 255));
-	//Boids.push_back(boid3);
-	//Boids[0].setTexture("Resources\\image\\sonic.png");
-
-	Boid boid4;
-	boid4.init(1, 0, 20, 2, 63, 484, 5);
-	boid4.setTexture("Resources\\image\\sonic.png");
-	boid4.b_followPath = true;
-	boid4.SetSeekPos(objetives[1].getPos(), 10);
-	boid4.SetFollowPath(objetives[21].getPos(), objetives[0].getPos(), 50, 50, 10);
-	boid4.m_sprite.setColor(sf::Color(255, 255, 255, 255));
-
-	//Boids[0].m_sprite = gsprite;
-
-	Boid boid5;
-	boid5.init(1, 0, 12, 2, 63, 484, 5);
-	boid5.b_followPath = true;
-	boid5.SetSeekPos(objetives[1].getPos(), 10);
-	boid5.SetFollowPath(objetives[21].getPos(), objetives[0].getPos(), 50, 50, 10);
-	boid5.m_sprite.setColor(sf::Color(0, 0, 255, 255));
-	//Boids.push_back(boid5);
-	Boid boid6;
-	boid6.init(.5, 0, 15, 2, 1000, 500, 15);
-	boid6.stay = true;
-	boid6.m_sprite.setColor(sf::Color(1, 1, 255, 255));
-	//Boids.push_back(boid6);
 	Boids.resize(8);
 	//Boids.resize(12);
 	Boids[0] = new Boid;
+	Boids[0]->controlID=0;
+	Boids[0]->m_color = {0,0,255,255};
 	Boids[0]->setName("Sonic");
-	Boids[0]->init(0.5, 0, 26, 2, 63, 484, 30);
+	Boids[0]->init(.8, 0, 26, 2, 63, 484, 30);
 	Boids[0]->b_followPath = true;
 	Boids[0]->iLeader = true;
 	Boids[0]->SetSeekPos(objetives[1].getPos(), 10);
-	Boids[0]->SetFollowPath(objetives[objetives.size() - 1].getPos(), objetives[0].getPos(), 80, 80, 10);
+	Boids[0]->SetFollowPath(objetives[objetives.size() - 1], objetives[0],150, 80,10);
+
+	Boids[2] = new Boid;
+	Boids[2]->controlID = 1;
+	Boids[2]->m_color = { 255,255,255,255 };
+	Boids[2]->init(.8, 0, 24, 2, 97, 507, 30);
+	Boids[2]->b_followPath = true;
+	Boids[2]->setTexture("Resources\\image\\silver.png");;
+	Boids[2]->setName("Silver");
+	Boids[2]->SetSeekPos(objetives[1].getPos(), 10);
+	Boids[2]->SetFollowPath(objetives[objetives.size() - 1], objetives[0], 150, 80, 10);
 
 	Boids[1] = new Boid;
+	Boids[1]->controlID = 2;
+	Boids[1]->m_color = { 0, 0, 102 ,255};
 	Boids[1]->init(.25, 0, 20, 2, 97, 460, 30);
 	Boids[1]->setTexture("Resources\\image\\metalSonic.png");;
 	Boids[1]->setName("MetalSonic");
 	Boids[1]->b_followPath = true;
 	Boids[1]->SetSeekPos(objetives[1].getPos(), 10);
-	Boids[1]->SetFollowPath(objetives[objetives.size() - 1].getPos(), objetives[0].getPos(), 80, 80, 10);
-
-	Boids[2] = new Boid;
-	Boids[2]->init(0.5, 0, 24, 2, 97, 507, 30);
-	Boids[2]->b_followPath = true;
-	Boids[2]->setTexture("Resources\\image\\silver.png");;
-	Boids[2]->setName("Silver");
-	Boids[2]->SetSeekPos(objetives[1].getPos(), 10);
-	Boids[2]->SetFollowPath(objetives[objetives.size() - 1].getPos(), objetives[0].getPos(), 80, 80, 10);
+	Boids[1]->SetFollowPath(objetives[objetives.size() - 1], objetives[0], 150, 80,10);
 
 	Boids[3] = new Boid;
+	Boids[3]->controlID = 3;
+	Boids[3]->m_color = { 255, 0, 0 ,255};
 	Boids[3]->init(0.3, 0, 25, 2, 63, 533, 30);
 	Boids[3]->b_followPath = true;
 	Boids[3]->setTexture("Resources\\image\\nukles.png");;
 	Boids[3]->setName("Nudillos");
 	Boids[3]->SetSeekPos(objetives[1].getPos(), 10);
-	Boids[3]->SetFollowPath(objetives[objetives.size() - 1].getPos(), objetives[0].getPos(), 80, 80, 10);
+	Boids[3]->SetFollowPath(objetives[objetives.size() - 1], objetives[0], 150, 80,10);
 
 	Boids[4] = new Boid;
+	Boids[4]->controlID = 4;
+	Boids[4]->m_color = { 255, 102, 204 ,255};
 	Boids[4]->init(0.6, 0, 21, 4, 97, 557, 30);
 	Boids[4]->b_followPath = true;
 	Boids[4]->setTexture("Resources\\image\\amy.png");;
 	Boids[4]->setName("Amy");
 	Boids[4]->SetSeekPos(objetives[1].getPos(), 10);
-	Boids[4]->SetFollowPath(objetives[objetives.size() - 1].getPos(), objetives[0].getPos(), 80, 80, 10);
+	Boids[4]->SetFollowPath(objetives[objetives.size() - 1], objetives[0], 150, 80,10);
 
 	Boids[5] = new Boid;
+	Boids[5]->controlID = 5;
+	Boids[5]->m_color = { 255, 255, 0 ,255};
 	Boids[5]->init(0.7, 0, 20, 5, 63, 581, 30);
 	Boids[5]->b_followPath = true;
 	Boids[5]->setTexture("Resources\\image\\tails.png");;
 	Boids[5]->setName("Tails");
 	Boids[5]->SetSeekPos(objetives[1].getPos(), 10);
-	Boids[5]->SetFollowPath(objetives[objetives.size() - 1].getPos(), objetives[0].getPos(), 80, 80, 10);
+	Boids[5]->SetFollowPath(objetives[objetives.size() - 1], objetives[0], 150, 80,10);
 
 	Boids[6] = new Boid;
+	Boids[6]->controlID = 6;
+	Boids[6]->m_color = { 51, 0, 0 ,255};
 	Boids[6]->init(0.5, 0, 25, 2, 97, 606, 30);
 	Boids[6]->b_followPath = true;
 	Boids[6]->setTexture("Resources\\image\\shadow.png");;
 	Boids[6]->setName("Shadow");
 	Boids[6]->SetSeekPos(objetives[1].getPos(), 10);
-	Boids[6]->SetFollowPath(objetives[objetives.size() - 1].getPos(), objetives[0].getPos(), 80, 80, 10);
+	Boids[6]->SetFollowPath(objetives[objetives.size() - 1], objetives[0], 150, 80,10);
 
 	Boids[7] = new Boid;
+	Boids[7]->controlID = 7;
+	Boids[7]->m_color = { 153, 0, 0 ,255};
 	Boids[7]->init(0.25, 0, 20, 4, 63, 627, 30);
 	Boids[7]->b_followPath = true;
 	Boids[7]->setTexture("Resources\\image\\eggman.png");;
 	Boids[7]->setName("Eggman");
 	Boids[7]->SetSeekPos(objetives[1].getPos(), 10);
-	Boids[7]->SetFollowPath(objetives[objetives.size() - 1].getPos(), objetives[0].getPos(), 80, 80, 10);
+	Boids[7]->SetFollowPath(objetives[objetives.size() - 1], objetives[0], 150, 80,10);
 
 
 
@@ -314,9 +292,8 @@ void InitBoids()
 		text[i].setFont(font);
 		// set the character size
 		text[i].setCharacterSize(24); // in pixels, not points!
-		text[i].setFillColor(sf::Color::Blue);
+		text[i].setFillColor(Boids[i]->m_color);
 		//text[i].setStyle(sf::Text::Bold | sf::Text::Underlined);
-
 	}
 	for (int i = 0; i < Boids.size(); i++)
 	{
@@ -325,34 +302,51 @@ void InitBoids()
 		Boids[i]->OE_followPath=g_manager.FirstEvent;
 	}
 }
-
 void update()
 {
+	
 
 	for (int i = 0; i < Boids.size(); i++)
 	{
+		if (!sf::Joystick::isConnected(Boids[i]->controlID))
+		{
+			continue;
+		}
 		if (Boids[i]->b_followPath&&Boids[i]->b_follow_arrive)
 		{
 			Boids[i]->follow_pathNum++;
 			if (Boids[i]->follow_pathNum > objetives.size()-1)
 			{
-				Boids[i]->SetFollowPath(objetives[Boids[i]->follow_pathNum-1].getPos(), objetives[0].getPos(), 30, 30,10);
+				Boids[i]->SetFollowPath(objetives[Boids[i]->follow_pathNum-1], objetives[0], 150, 80, 10);
 				Boids[i]->follow_pathNum = 0;
 				Boids[i]->punto=0;
 				Boids[i]->numVuelta++;
 			}
 			else
 			{
-				Boids[i]->SetFollowPath(objetives[Boids[i]->follow_pathNum-1].getPos(), objetives[Boids[i]->follow_pathNum].getPos(), 30, 30, 10);
+				Boids[i]->SetFollowPath(objetives[Boids[i]->follow_pathNum-1], objetives[Boids[i]->follow_pathNum], 150, 80, 10);
 				Boids[i]->punto++;
 
 			}
 		}
+		if (Boids[i]->follow_pathNum==0 )
+		{
+			Boids[i]->SetFollowPath(objetives[objetives.size() - 1], objetives[0], 150, 80, 10);
+		}
+		else
+		{
+			Boids[i]->SetFollowPath(objetives[Boids[i]->follow_pathNum - 1], objetives[Boids[i]->follow_pathNum], 150, 80, 10);
+		}
 	}
 	for (int i = 0; i < Boids.size(); i++)
 	{
+		if (sf::Joystick::isConnected(Boids[i]->controlID))
+		{
+			g_inManager.onUpdate(Boids[i]->controlID,*Boids[i]);
+			continue;
+		}
 		//Boids[i]->setcompas(Boids);
-		Boids[i]->update();
+		//Boids[i]->update();
 
 		if (Boids[i]->b_inPoint)
 		{
@@ -364,13 +358,6 @@ void update()
 }
 void render()
 {
-	//sf__
-	//if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
-	//{
-	//	system("cls");
-	//	sf::Vector2i position = sf::Mouse::get();
-	//	std::cout << "x: " << position.x << "y: " << position.y<<"\n";
-	//}
 	g_window->draw(map_sprite);
 	sf::VertexArray lines(sf::LinesStrip, objetives.size()+1);
 	for (size_t i = 0; i < objetives.size(); i++)
@@ -378,32 +365,11 @@ void render()
 		lines[i].position = sf::Vector2f(objetives[i].getPos().x, objetives[i].getPos().y);
 
 	}
-	//lines[1].position = sf::Vector2f(objetives[1].getPos().x, objetives[1].getPos().y);
-	//lines[2].position = sf::Vector2f(objetives[2].getPos().x, objetives[2].getPos().y);
-	//lines[3].position = sf::Vector2f(objetives[3].getPos().x, objetives[3].getPos().y);
-	//lines[4].position = sf::Vector2f(objetives[4].getPos().x, objetives[4].getPos().y);
-	//lines[5].position = sf::Vector2f(objetives[5].getPos().x, objetives[5].getPos().y);
-	//lines[6].position = sf::Vector2f(objetives[6].getPos().x, objetives[6].getPos().y);
-	//lines[7].position = sf::Vector2f(objetives[7].getPos().x, objetives[7].getPos().y);
-	//lines[8].position = sf::Vector2f(objetives[8].getPos().x, objetives[8].getPos().y);
-	//lines[9].position = sf::Vector2f(objetives[9].getPos().x, objetives[9].getPos().y);
-	//lines[10].position = sf::Vector2f(objetives[10].getPos().x, objetives[10].getPos().y);
-	//lines[11].position = sf::Vector2f(objetives[11].getPos().x, objetives[11].getPos().y);
-	//lines[12].position = sf::Vector2f(objetives[12].getPos().x, objetives[12].getPos().y);
-	//lines[13].position = sf::Vector2f(objetives[13].getPos().x, objetives[13].getPos().y);
-	//lines[14].position = sf::Vector2f(objetives[14].getPos().x, objetives[14].getPos().y);
-	//lines[15].position = sf::Vector2f(objetives[15].getPos().x, objetives[15].getPos().y);
-	//lines[16].position = sf::Vector2f(objetives[16].getPos().x, objetives[16].getPos().y);
-	//lines[17].position = sf::Vector2f(objetives[17].getPos().x, objetives[17].getPos().y);
-	//lines[18].position = sf::Vector2f(objetives[18].getPos().x, objetives[18].getPos().y);
-	//lines[19].position = sf::Vector2f(objetives[19].getPos().x, objetives[19].getPos().y);
-	//lines[20].position = sf::Vector2f(objetives[20].getPos().x, objetives[20].getPos().y);
-	//lines[21].position = sf::Vector2f(objetives[21].getPos().x, objetives[21].getPos().y);
 	lines[objetives.size() ].position = sf::Vector2f(objetives[0].getPos().x, objetives[0].getPos().y);
 
 	for (int i = 0; i < objetives.size(); i++)
 	{
-		//objetives[i].draw(*g_window);
+		objetives[i].draw(*g_window);
 	}
 	//g_window->draw(lines);
 	int pos = 0;
@@ -426,8 +392,12 @@ void render()
 	}
 	for (int i = 0; i < Boids.size(); i++)
 	{
-		Boids[i]->render(*g_window);
-		g_window->draw(text[i]);
+		if (sf::Joystick::isConnected(Boids[i]->controlID))
+		{
+			Boids[i]->render(*g_window);
+			text[i].setFillColor(Boids[i]->m_color);
+			g_window->draw(text[i]);
+		}	
 	}
 	
 }
@@ -445,9 +415,9 @@ void display()
 		Boids[i]->m_timeTrans += (timeTrans/60);
 		Boids[i]->m_wanderTime += (timeTrans/1);
 		Boids[i]->timeDes += (timeTrans / 60);
+		g_inManager.m_timeTrans = (timeTrans / 60);
 	}
 }
-
 void chekPositions()
 {
 	for (int i = Boids.size() - 1; i > -1; i--)
@@ -464,7 +434,6 @@ void chekPositions()
 				Boids[i] = Boids[j];
 				Boids[j] = change;
 			}
-
 		}
 	}
 	for (int i = Boids.size() - 1; i > -1; i--)
@@ -503,9 +472,43 @@ void chekPositions()
 			}
 		}
 	}
-		
 	for (size_t i = 0; i < Boids.size(); i++)
 	{
 		Boids[i]->lugar = i + 1;
 	}
+}
+void initPruebas()
+{
+	if (checkVectorInit())
+		std::cout << "El vector SI se inicia en (0,0)\n";
+	else
+		std::cout << "El vector NO se inicia en (0,0)\n";
+	if (checkModulo())
+		std::cout << "La magnitud de vector SI da el resultado esperado\n";
+	else
+		std::cout << "La magnitud de vector NO da el resultado esperado\n";
+	if (checkVectorSum())
+		std::cout << "La suma de los vectores SI da el resultado esperado\n";
+	else
+		std::cout << "La suma de los vectores NO da el resultado esperado\n";
+	if (checkVectorNormalize())
+		std::cout << "La Normalizacion de un vector SI da el resultado esperado\n";
+	else
+		std::cout << "La Normalizacion de un vector NO da el resultado esperado\n";
+	if (checkVectorDot())
+		std::cout << "El producto punto de los vectores SI da el resultado esperado\n";
+	else
+		std::cout << "El producto punto de los vectores NO da el resultado esperado\n";
+	if (checkVectorCroos())
+		std::cout << "El producto Cruz de los vectores SI da el resultado esperado\n";
+	else
+		std::cout << "El producto Cruz de los vectores NO da el resultado esperado\n";
+	if (ChecKBoidsFunctionSeek())
+		std::cout << "El comportamiento Seek SI da el resultado esperado\n";
+	else
+		std::cout << "El comportamiento Seek NO da el resultado esperado\n";
+	if (ChecKBoidsFunctionFlee())
+		std::cout << "El comportamiento FLEE SI da el resultado esperado\n";
+	else
+		std::cout << "El comportamiento FLEE NO da el resultado esperado\n";
 }

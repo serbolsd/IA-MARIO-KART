@@ -27,5 +27,6 @@ void Point::init(vector2 pos)
 
 void Point::draw(sf::RenderWindow & window)
 {
+	m_sprite.setColor(color);
 	window.draw(m_sprite);
 }

@@ -79,7 +79,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(DEVLIBS)\SFML\include\</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(VCInstallDir)UnitTest\include;C:\Users\sergi\source\repos\IA-COMPORTAMIENTOS\UnitTest\UnitTest;$(DEVLIBS)\SFML\include\</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <AdditionalDependencies>sfml-main-d.lib;sfml-window-d.lib;sfml-system-d.lib;sfml-graphics-d.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -137,6 +137,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Boid.cpp" />
+    <ClCompile Include="CinputManager.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Manager.cpp" />
     <ClCompile Include="Observer.cpp" />
@@ -147,10 +148,12 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Boid.h" />
+    <ClInclude Include="CinputManager.h" />
     <ClInclude Include="Manager.h" />
     <ClInclude Include="Observer.h" />
     <ClInclude Include="Observe_Event.h" />
     <ClInclude Include="Point.h" />
+    <ClInclude Include="Pruebas.h" />
     <ClInclude Include="Runner.h" />
     <ClInclude Include="vector2.h" />
   </ItemGroup>

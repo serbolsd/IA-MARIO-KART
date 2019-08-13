@@ -1,12 +1,4 @@
 #include "vector2.h"
-
-//vector2::vector2()
-//{
-//
-//}
-
-
-
 vector2::vector2(const vector2 & vec)
 {
 	*this = vec;
@@ -15,7 +7,6 @@ vector2::vector2(const vector2 & vec)
 vector2::~vector2()
 {
 }
-
 
 vector2 vector2::operator+(const vector2 & vec)
 {
@@ -56,10 +47,7 @@ vector2 & vector2::operator=(const vector2 & vec)
 	x = vec.x;
 	y = vec.y;
 	return *this;
-	// TODO: insertar una instrucción return aquí
 }
-
-
 
 vector2 vector2::operator+=(const vector2 & vec)
 {
@@ -85,8 +73,6 @@ vector2 vector2::operator/=(const float & val)
 	return *this;
 }
 
-
-
 bool vector2::operator==(const vector2 & vec)
 {
 	if (x == vec.x&&y == vec.y)
@@ -107,7 +93,6 @@ bool vector2::operator!=(const vector2 & vec)
 
 float & vector2::operator[](const unsigned int & index)
 {
-	// TODO: insertar una instrucción return aquí
 	if (index == 0)
 	{
 		return x;
@@ -134,7 +119,6 @@ vector2 vector2::normalize()
 	}
 	float inverseCarmak = 1 / magnitud();
 	vec.x = X * inverseCarmak; vec.y = Y * inverseCarmak;
-	//return vector2(x * inverseCarmak, y * inverseCarmak);
 	return vec;
 }
 
@@ -156,5 +140,3 @@ vector2 vector2::cross(vector2 vec)
 {
 	return vector2((x*vec.y,-y*vec.x));
 }
-
-

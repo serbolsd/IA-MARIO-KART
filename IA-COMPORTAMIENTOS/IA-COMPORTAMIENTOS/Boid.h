@@ -5,21 +5,25 @@
 #include "Point.h"
 #include <Window.hpp>
 #include "Observe_Event.h"
+
 class Boid
 {
 public:
 	Boid();
 	~Boid();
-private:
+	vector2 m_direccion;
+	float m_acceleration;
+	float m_desacceleration;
 	float m_weight;
 	float m_speed;
 	float m_actualSpeed;
 	float m_maxSpeed;
 	float m_actualMaxSpeed;
-	float m_acceleration;
 	float m_ratio;
+	int controlID=-1;
+public:
+	
 	vector2* m_position;
-	vector2 m_direccion;
 	vector2 fliccion;
 	void setPosition(const float& posX, const float& posy);
 	sf::Texture texture;
@@ -59,12 +63,13 @@ private:
 	//Separate
 	std::vector<vector2*>compas_pos;
 	std::vector<Boid*>compas;
-	float m_acelartionTime = 0;
+
 
 	int vec2ArrayCount = 0;
 	std::string m_name;
-
+	sf::Color m_color;
 public:
+	float m_acelartionTime = 0;
 	Observe_Event *OE_followPath;
 	bool iLeader = false;
 	int follow_pathNum = 0;
@@ -89,7 +94,7 @@ public:
 	void SetPursueData(const vector2& objetivePos, const vector2& objetiveDir, const float & objetiveSpeed, const float & magnitud);
 	void SetEvadeData(const vector2 & predatorPos, const vector2 & predatorDir, const float & predatorSpeed, const float & magnitud);
 	void SetobstacleData(const vector2& objetPos, const float & ratio, const float & magnitud);
-	void SetFollowPath(const vector2& pointA, const vector2& pointB,const float & pathRatio, const float & pointRatio, const float & magnitud);
+	void SetFollowPath( Point& pointA, Point& pointB,const float & pathRatio, const float & pointRatio, const float & magnitud);
 	void setBoidRatio(const float &ratio) { m_ratio =ratio; };
 	void setcompasPosition(std::vector<vector2*>compa) { compas_pos = compa; };
 	void setcompas(std::vector<Boid*>GETcompas) { compas = GETcompas; };
